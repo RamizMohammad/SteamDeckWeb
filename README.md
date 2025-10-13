@@ -1,4 +1,4 @@
-<h1 align="center">🎛️ SteamDeck Web</h1>
+<h1 align="center">🎛️ Linkium Main Page</h1>
 
 <p align="center">
   <b>A sleek, digital Stream Deck interface built with React, TypeScript & Tailwind.</b><br>
@@ -30,6 +30,7 @@ npm install
 # 4️⃣ Run the development server
 npm run dev
 💡 Tip: The app automatically reloads on changes with Vite’s Hot Module Replacement.
+```
 
 🧩 Features
 ✅ Stream Deck–like grid with glowing effects
@@ -127,4 +128,4 @@ git push origin feature/amazing-feature
 Licensed under the MIT License.
 Feel free to use, remix, and build upon it.
 
-<p align="center"> Made with ❤️ by <b><a href="https://likium.space/">Likium Labs</a></b><br> <i>Powered by React, Tailwind & Supabase</i> </p> ```
+<p align="center"> Made with ❤️ by <b><a href="https://likium.space/">Likium Labs</a></b><br> <i>Powered by React, Tailwind & Supabase</i> </p>
