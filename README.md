@@ -56,7 +56,8 @@ SteamDeckWeb-main/
 ├── package.json         # Dependencies & scripts
 └── index.html           # App entry
 </details>
-🌈 Tech Stack
+
+#🌈 Tech Stack
 Technology	Purpose
 ⚛️ React 18	UI library
 🧠 TypeScript	Type safety
