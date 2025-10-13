@@ -237,7 +237,6 @@ function Home() {
           <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
             Open, manage, and automate your desktop apps instantly — from any device. The ultimate remote control for power users, gamers, and creators.
           </p>
-          
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
