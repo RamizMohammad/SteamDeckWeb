@@ -1,0 +1,22 @@
+name: Trigger deck-main sync
+
+on:
+  push:
+    branches:
+      - main   # every push to main branch triggers sync
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+
+    steps:
+      - name: Dispatch event to deck-main
+        run: |
+          curl -X POST https://api.github.com/repos/RamizMohammad/deck-main/dispatches \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"event_type": "sync"}'
