@@ -209,7 +209,7 @@ function Home() {
               Download
             </button>
             <button
-            onClick={() => window.open("https://www.connection.linkium.space/", "_blank")}
+            onClick={() => window.open("connection.linkium.space", "_blank")}
             className="px-6 py-2 bg-gradient-to-r from-[#00B4FF] to-[#0088CC] rounded-lg font-semibold hover:shadow-[0_0_20px_rgba(0,180,255,0.5)] transition-all duration-300">
               Connect
             </button>
