@@ -32,39 +32,52 @@ npm run dev
 💡 Tip: The app automatically reloads on changes with Vite’s Hot Module Replacement.
 ```
 
-🧩 Features
-✅ Stream Deck–like grid with glowing effects
-✅ Multi-page structure using React Router
-✅ Tailwind-powered responsive layout
-✅ Supabase integration ready
-✅ Fast builds & live reload via Vite
-✅ Type-safe with TypeScript
-✅ Developer + Legal pages included
+## 🧩 Features
 
-<details> <summary>📂 <b>Project Structure</b> (click to expand)</summary>
-csharp
-Copy code
-SteamDeckWeb-main/
-├── public/              # Static assets (logos, icons)
-├── src/
-│   ├── pages/           # React pages (Home, Developer, Terms, etc.)
-│   ├── App.tsx          # Main app layout
-│   ├── main.tsx         # React root renderer
-│   ├── index.css        # Tailwind setup
-├── tailwind.config.js   # Tailwind config
-├── vite.config.ts       # Vite setup
-├── package.json         # Dependencies & scripts
-└── index.html           # App entry
+| Feature | Description |
+|----------|--------------|
+| 🎛️ Stream Deck–like Grid | Interactive glowing button grid that mimics the Elgato Stream Deck |
+| 🧭 Multi-page Navigation | Built using React Router for smooth transitions |
+| 🎨 Responsive Layout | Fully mobile-friendly with Tailwind CSS |
+| ☁️ Supabase Integration | Ready-to-use backend and authentication layer |
+| ⚡ Fast Builds | Vite provides instant dev reload and optimized production builds |
+| 🧠 Type-safe Codebase | Written completely in TypeScript for stability |
+| 📄 Developer + Legal Pages | Includes Developer, Terms, Privacy, and Support pages |
+
+---
+
+<details>
+<summary>📂 <b>Project Structure</b> (click to expand)</summary>
+
+| Path | Description |
+|------|--------------|
+| `public/` | Static assets (logos, icons) |
+| `src/` | Source code of the app |
+| `src/pages/` | React pages (Home, Developer, Terms, etc.) |
+| `src/App.tsx` | Main application layout |
+| `src/main.tsx` | Root React renderer |
+| `src/index.css` | Tailwind setup and global styles |
+| `tailwind.config.js` | Tailwind CSS configuration |
+| `vite.config.ts` | Vite configuration and optimizations |
+| `package.json` | Project dependencies and npm scripts |
+| `tsconfig.json` | TypeScript project configuration |
+| `index.html` | HTML entry point |
+
 </details>
 
-#🌈 Tech Stack
-Technology	Purpose
-⚛️ React 18	UI library
-🧠 TypeScript	Type safety
-⚡ Vite 5	Build tool
-🎨 TailwindCSS	Styling
-☁️ Supabase	Realtime backend
-💡 Lucide React	Icon system
+---
+
+## 🌈 Tech Stack
+
+| Technology | Purpose |
+|-------------|----------|
+| ⚛️ **React 18** | UI component library |
+| 🧠 **TypeScript** | Type-safe JavaScript |
+| ⚡ **Vite 5** | Lightning-fast development and build tool |
+| 🎨 **TailwindCSS** | Utility-first styling framework |
+| ☁️ **Supabase** | Realtime backend and authentication |
+| 💡 **Lucide React** | Icon system for consistent design |
+
 
 🖼️ UI Preview
 <p align="center"> <img src="https://raw.githubusercontent.com/yourusername/SteamDeckWeb/main/public/Linkium.png" width="220" alt="Preview 1"/> <img src="https://raw.githubusercontent.com/yourusername/SteamDeckWeb/main/public/RLogo.png" width="220" alt="Preview 2"/> </p>
