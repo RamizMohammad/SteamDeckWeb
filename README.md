@@ -80,7 +80,7 @@ npm run dev
 
 
 🖼️ UI Preview
-<p align="center"> <img src="https://raw.githubusercontent.com/yourusername/SteamDeckWeb/main/public/Linkium.png" width="220" alt="Preview 1"/> <img src="https://raw.githubusercontent.com/yourusername/SteamDeckWeb/main/public/RLogo.png" width="220" alt="Preview 2"/> </p>
+<p align="center"> <img src="https://github.com/adnanrasool128/SteamDeckWeb/releases/download/v1.0/s1.png" width="220" alt="Preview 1"/> <img src="https://github.com/adnanrasool128/SteamDeckWeb/releases/download/v1.0/s2.png" width="220" alt="Preview 2"/> <img src="https://github.com/adnanrasool128/SteamDeckWeb/releases/download/v1.0/s3.png" width="220" alt="Preview 2"/></p>
 🎛️ Buttons glow with smooth transitions and adapt to screen sizes beautifully.
 
 ⚙️ Scripts
