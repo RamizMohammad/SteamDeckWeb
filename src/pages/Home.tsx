@@ -208,6 +208,11 @@ function Home() {
             className="px-6 py-2 bg-gradient-to-r from-[#00B4FF] to-[#0088CC] rounded-lg font-semibold hover:shadow-[0_0_20px_rgba(0,180,255,0.5)] transition-all duration-300">
               Download
             </button>
+            <button
+            onClick={() => window.open("https://www.connection.linkium.space/", "_blank")}
+            className="px-6 py-2 bg-gradient-to-r from-[#00B4FF] to-[#0088CC] rounded-lg font-semibold hover:shadow-[0_0_20px_rgba(0,180,255,0.5)] transition-all duration-300">
+              Connect
+            </button>
           </div>
         </div>
       </header>
@@ -246,7 +251,7 @@ function Home() {
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
-          
+
           <div className="mt-16 flex flex-wrap justify-center gap-8 text-sm text-gray-400">
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#2ECC71]/10 border border-[#2ECC71]/30">
               <div className="w-2 h-2 bg-[#2ECC71] rounded-full animate-pulse" />
