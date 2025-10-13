@@ -12,8 +12,9 @@ jobs:
     steps:
       - name: Trigger repository_dispatch event on deck-main
         run: |
-          curl -X POST https://api.github.com/repos/AdnanRasool128/deck-main/dispatches \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: token ${{ secrets.SYNC_PAT }}" \
-            -H "Content-Type: application/json" \
-            -d '{"event_type": "sync"}'
+          curl -i -X POST https://api.github.com/repos/AdnanRasool128/deck-main/dispatches \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: token ${{ secrets.SYNC_PAT }}" \
+          -H "Content-Type: application/json" \
+          -d '{"event_type": "sync"}'
+
