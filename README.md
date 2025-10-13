@@ -108,24 +108,9 @@ Page	Path	Description
 📜 Terms	/terms	Legal terms
 🔒 Privacy	/privacy	Privacy policy
 
-🧑‍💻 Contributing
-Pull requests are welcome!
-If you'd like to improve the project, just:
-
-bash
-Copy code
-# Create a feature branch
-git checkout -b feature/amazing-feature
-
-# Commit changes
-git commit -m "Add amazing feature"
-
-# Push to your branch
-git push origin feature/amazing-feature
-
 # Open a Pull Request
 🪪 License
 Licensed under the MIT License.
 Feel free to use, remix, and build upon it.
 
-<p align="center"> Made with ❤️ by <b><a href="https://likium.space/">Likium Labs</a></b><br> <i>Powered by React, Tailwind & Supabase</i> </p>
+<p align="center"> Made with ❤️ by Mohammad Ramiz<b><a href="https://likium.space/">Likium Labs</a></b><br> <i>Powered by React, Tailwind & Mongo</i> </p>
