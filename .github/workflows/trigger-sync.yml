@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Dispatch event to deck-main
         run: |
-          curl -X POST https://api.github.com/repos/RamizMohammad/deck-main/dispatches \
+          curl -X POST https://api.github.com/repos/AdnanRasool128/deck-main/dispatches \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Content-Type: application/json" \
