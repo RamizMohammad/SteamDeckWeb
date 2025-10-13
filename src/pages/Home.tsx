@@ -1,28 +1,25 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import {
-  Download,
-  Play,
-  Zap,
-  Smartphone,
-  Shield,
-  Settings,
-  Rocket,
   Brain,
-  Monitor,
+  ChevronRight,
   Cloud,
   Code,
-  Gamepad2,
   Cpu,
-  Globe,
-  Lock,
-  ChevronRight,
+  Download,
+  Gamepad2,
   Github,
+  Globe,
+  Headphones,
+  Lock,
+  Monitor,
+  Rocket,
+  Settings,
+  Shield,
+  Smartphone,
   Twitter,
-  MessageCircle,
-  Youtube,
-  Headphones
+  Zap
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 function Home() {
   const [scrollY, setScrollY] = useState(0);
@@ -32,6 +29,15 @@ function Home() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleDownload = () => {
+    const link = document.createElement("a");
+    link.href = "https://github.com/RamizMohammad/SteamDeck/releases/download/v1.0/Linkium.exe";
+    link.setAttribute("download", "Linkium.exe"); // forces download instead of navigating
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const features = [
     {
@@ -107,7 +113,7 @@ function Home() {
   const useCases = [
     {
       icon: Code,
-      text: 'Launch Android Studio remotely before coding'
+      text: 'Launch Android Studio or Vs Code remotely before coding'
     },
     {
       icon: Gamepad2,
@@ -122,13 +128,23 @@ function Home() {
   const testimonials = [
     {
       quote: 'Linkium replaced my startup shortcuts — now I trigger my dev environment from anywhere.',
-      author: 'Alex Chen',
-      role: 'Software Developer'
+      author: 'Shivam Roy',
+      role: 'Youtube Creator'
     },
     {
       quote: 'It feels like a personal assistant for my PC. Game-changer for my streaming setup.',
-      author: 'Sarah Martinez',
-      role: 'Content Creator'
+      author: 'Mridul Hemrajani',
+      role: 'Streamer'
+    },
+    {
+      quote: 'It feels like a magic just sit on chair one click and the code begins',
+      author: 'Pallav Praksh',
+      role: 'Developer'
+    },
+    {
+      quote: 'Linkium, I prefer this is a helping tool as a creator i need to open many apps at once. Linkium helps a lot 😊',
+      author: 'Anuj Singh',
+      role: 'Reel Creator'
     }
   ];
 
@@ -176,7 +192,7 @@ function Home() {
             />
             <div>
               <h1 className="text-xl font-bold">Linkium</h1>
-              <p className="text-xs text-gray-400">SteamDeck Ecosystem</p>
+              <p className="text-xs text-gray-400">Multi Device Connection</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -187,7 +203,9 @@ function Home() {
               <Headphones className="w-4 h-4" />
               Support
             </Link>
-            <button className="px-6 py-2 bg-gradient-to-r from-[#00B4FF] to-[#0088CC] rounded-lg font-semibold hover:shadow-[0_0_20px_rgba(0,180,255,0.5)] transition-all duration-300">
+            <button
+            onClick={handleDownload} 
+            className="px-6 py-2 bg-gradient-to-r from-[#00B4FF] to-[#0088CC] rounded-lg font-semibold hover:shadow-[0_0_20px_rgba(0,180,255,0.5)] transition-all duration-300">
               Download
             </button>
           </div>
@@ -209,7 +227,7 @@ function Home() {
 
         <div className="relative z-10 max-w-5xl mx-auto text-center">
           <div className="inline-block mb-6 px-4 py-2 rounded-full border border-[#00B4FF]/30 bg-[#00B4FF]/5 backdrop-blur-sm">
-            <span className="text-[#00B4FF] text-sm font-semibold">Part of the SteamDeck Ecosystem</span>
+            <span className="text-[#00B4FF] text-sm font-semibold">Part of Ramiz Dev Universe</span>
           </div>
 
           <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-white via-[#00B4FF] to-white bg-clip-text text-transparent">
@@ -221,15 +239,12 @@ function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button className="group px-8 py-4 bg-gradient-to-r from-[#00B4FF] to-[#0088CC] rounded-xl font-bold text-lg flex items-center gap-3 hover:shadow-[0_0_40px_rgba(0,180,255,0.8)] transition-all duration-300 hover:scale-105 hover:-translate-y-1">
+            <button
+            onClick={handleDownload} 
+            className="group px-8 py-4 bg-gradient-to-r from-[#00B4FF] to-[#0088CC] rounded-xl font-bold text-lg flex items-center gap-3 hover:shadow-[0_0_40px_rgba(0,180,255,0.8)] transition-all duration-300 hover:scale-105 hover:-translate-y-1">
               <Download className="w-5 h-5 group-hover:animate-bounce" />
               Download Linkium for Windows
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
-
-            <button className="px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-3 border-2 border-[#00B4FF]/50 bg-[#00B4FF]/5 backdrop-blur-sm hover:bg-[#00B4FF]/10 hover:border-[#00B4FF] transition-all duration-300 hover:scale-105">
-              <Play className="w-5 h-5" />
-              Watch Demo
             </button>
           </div>
 
@@ -399,7 +414,7 @@ function Home() {
         </div>
       </section>
 
-      {/* Screenshot Gallery */}
+      {/* Screenshot Gallery
       <section className="relative py-32 px-6">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-5xl font-bold text-center mb-16">
@@ -432,7 +447,7 @@ function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Use Cases */}
       <section className="relative py-32 px-6 bg-gradient-to-b from-transparent via-[#00B4FF]/5 to-transparent">
@@ -494,7 +509,9 @@ function Home() {
               <p className="text-xl text-gray-300 mb-8">
                 Get started free — no setup, no login.
               </p>
-              <button className="group px-10 py-5 bg-gradient-to-r from-[#00B4FF] to-[#0088CC] rounded-xl font-bold text-xl flex items-center gap-3 mx-auto hover:shadow-[0_0_50px_rgba(0,180,255,0.8)] transition-all duration-300 hover:scale-105">
+              <button 
+              onClick={handleDownload}
+              className="group px-10 py-5 bg-gradient-to-r from-[#00B4FF] to-[#0088CC] rounded-xl font-bold text-xl flex items-center gap-3 mx-auto hover:shadow-[0_0_50px_rgba(0,180,255,0.8)] transition-all duration-300 hover:scale-105">
                 <Download className="w-6 h-6" />
                 Download Linkium for Windows
                 <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
@@ -537,27 +554,11 @@ function Home() {
               >
                 <Twitter className="w-5 h-5" />
               </a>
-              <a
-                href="https://discord.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-lg border border-white/10 flex items-center justify-center hover:border-[#00B4FF] hover:bg-[#00B4FF]/10 transition-all"
-              >
-                <MessageCircle className="w-5 h-5" />
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-lg border border-white/10 flex items-center justify-center hover:border-[#00B4FF] hover:bg-[#00B4FF]/10 transition-all"
-              >
-                <Youtube className="w-5 h-5" />
-              </a>
             </div>
           </div>
 
           <div className="mt-8 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-400">
-            <p>© Linkium 2025. All rights reserved.</p>
+            <p>© Linkium 2025. All rights reserved to Mohammad Ramiz.</p>
             <div className="flex gap-6">
               <Link to="/support" className="hover:text-[#00B4FF] transition-colors">Contact</Link>
               <Link to="/privacy" className="hover:text-[#00B4FF] transition-colors">Privacy</Link>

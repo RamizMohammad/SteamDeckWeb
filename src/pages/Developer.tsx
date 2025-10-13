@@ -1,16 +1,15 @@
-import { Link } from 'react-router-dom';
 import {
-  Github,
-  Linkedin,
-  Globe,
-  ExternalLink,
-  Gamepad2,
-  Store,
-  Play,
-  User,
+  ArrowLeft,
   Code2,
-  ArrowLeft
+  ExternalLink,
+  Github,
+  Globe,
+  Linkedin,
+  Play,
+  Store,
+  User
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 function Developer() {
   const profiles = [
@@ -18,7 +17,7 @@ function Developer() {
       icon: Github,
       name: 'GitHub',
       description: 'Open source projects and code repositories',
-      url: 'https://github.com/yourusername',
+      url: 'https://github.com/RamizMohammad',
       color: 'from-gray-500 to-gray-700',
       borderColor: 'border-gray-500/50'
     },
@@ -26,7 +25,7 @@ function Developer() {
       icon: Linkedin,
       name: 'LinkedIn',
       description: 'Professional network and career',
-      url: 'https://linkedin.com/in/yourprofile',
+      url: 'https://linkedin.com/in/RamizMohammad',
       color: 'from-blue-500 to-blue-700',
       borderColor: 'border-blue-500/50'
     },
@@ -34,7 +33,7 @@ function Developer() {
       icon: Globe,
       name: 'Portfolio',
       description: 'Personal portfolio website',
-      url: 'https://yourportfolio.com',
+      url: 'https://www.mohammadramiz.in',
       color: 'from-cyan-500 to-cyan-700',
       borderColor: 'border-cyan-500/50'
     },
@@ -42,7 +41,7 @@ function Developer() {
       icon: Play,
       name: 'Google Play',
       description: 'Android apps on Google Play Store',
-      url: 'https://play.google.com/store/apps/developer?id=YourDevName',
+      url: 'https://play.google.com/store/apps/dev?id=7747635745987607440&hl=en',
       color: 'from-green-500 to-green-700',
       borderColor: 'border-green-500/50'
     },
@@ -50,7 +49,7 @@ function Developer() {
       icon: Code2,
       name: 'Google Developer',
       description: 'Google Developer profile',
-      url: 'https://developers.google.com/profile/u/yourprofile',
+      url: 'https://developers.google.com/profile/u/MohammadRamiz',
       color: 'from-red-500 to-yellow-500',
       borderColor: 'border-red-500/50'
     },
@@ -58,7 +57,7 @@ function Developer() {
       icon: Store,
       name: 'Windows Store',
       description: 'Apps on Microsoft Store',
-      url: 'https://apps.microsoft.com/store/search?publisher=YourDevName',
+      url: 'https://www.mohammadramiz.in/windowapp',
       color: 'from-blue-600 to-blue-800',
       borderColor: 'border-blue-600/50'
     }
@@ -85,7 +84,7 @@ function Developer() {
             />
             <div>
               <h1 className="text-xl font-bold">Linkium</h1>
-              <p className="text-xs text-gray-400">SteamDeck Ecosystem</p>
+              <p className="text-xs text-gray-400">Multi Device Connection</p>
             </div>
           </Link>
           <Link
