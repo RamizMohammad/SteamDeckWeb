@@ -18,9 +18,9 @@ import {
   Settings,
   Shield,
   Smartphone,
-  Twitter,
   Zap,
 } from 'lucide-react';
+import NetworkBackground from './NetworkBackground';
 
 // Type definitions
 interface Feature {
@@ -45,6 +45,18 @@ interface Testimonial {
   author: string;
   role: string;
 }
+
+// Custom X (Twitter) Icon Component
+const XIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg
+    {...props}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
 
 // Custom hook to detect when an element is in viewport
 const useInView = (options?: IntersectionObserverInit) => {
@@ -71,57 +83,61 @@ const useInView = (options?: IntersectionObserverInit) => {
 
 const Home: React.FC = () => {
   const [scrollY, setScrollY] = useState<number>(0);
-  const { ref: flowchartRef, isInView: isFlowchartInView } = useInView({ threshold: 0.1 });
+  const { ref: flowchartRef, isInView: isFlowchartInView } = useInView({ threshold: 0.15 });
   const [activeStep, setActiveStep] = useState(0);
-  // For mobile, we use a simple animation trigger
-  const [mobileStep, setMobileStep] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
+  const [showTickAll, setShowTickAll] = useState(false);
+  const animationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Detect mobile device
+  // Unified flowchart animation effect with repeat
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+    if (isFlowchartInView) {
+      // Start the animation sequence
+      const startAnimation = () => {
+        setActiveStep(1);
+        setShowTickAll(false);
+        
+        const step2Timer = setTimeout(() => setActiveStep(2), 1000);
+        const step3Timer = setTimeout(() => setActiveStep(3), 2000);
+        const completionTimer = setTimeout(() => {
+          setShowTickAll(true);
+        }, 3000);
+        
+        // Reset and repeat after 5 seconds of showing ticks
+        const repeatTimer = setTimeout(() => {
+          setActiveStep(0);
+          setShowTickAll(false);
+          startAnimation();
+        }, 8000);
+        
+        return () => {
+          clearTimeout(step2Timer);
+          clearTimeout(step3Timer);
+          clearTimeout(completionTimer);
+          clearTimeout(repeatTimer);
+        };
+      };
+      
+      animationIntervalRef.current = startAnimation() as unknown as NodeJS.Timeout;
+      
+      return () => {
+        if (animationIntervalRef.current) {
+          clearTimeout(animationIntervalRef.current);
+        }
+      };
+    } else {
+      setActiveStep(0);
+      setShowTickAll(false);
+      if (animationIntervalRef.current) {
+        clearTimeout(animationIntervalRef.current);
+      }
+    }
+  }, [isFlowchartInView]);
 
   useEffect(() => {
     const handleScroll = (): void => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // Flowchart animation effect - simplified for mobile
-  useEffect(() => {
-    if (isFlowchartInView) {
-      if (isMobile) {
-        // Mobile: simple sequential step animation with longer delays for readability
-        const step1Timer = setTimeout(() => setMobileStep(1), 300);
-        const step2Timer = setTimeout(() => setMobileStep(2), 1200);
-        const step3Timer = setTimeout(() => setMobileStep(3), 2100);
-        return () => {
-          clearTimeout(step1Timer);
-          clearTimeout(step2Timer);
-          clearTimeout(step3Timer);
-        };
-      } else {
-        // Desktop: full animated flowchart with line drawing
-        const step1Timer = setTimeout(() => setActiveStep(1), 500);
-        const step2Timer = setTimeout(() => setActiveStep(2), 1800);
-        const step3Timer = setTimeout(() => setActiveStep(3), 3100);
-        return () => {
-          clearTimeout(step1Timer);
-          clearTimeout(step2Timer);
-          clearTimeout(step3Timer);
-        };
-      }
-    } else {
-      setActiveStep(0);
-      setMobileStep(0);
-    }
-  }, [isFlowchartInView, isMobile]);
 
   const handleDownload = useCallback((): void => {
     const link = document.createElement('a');
@@ -245,42 +261,50 @@ const Home: React.FC = () => {
     },
   ];
 
-  // Current step for animation (works for both mobile and desktop)
-  const currentStep = isMobile ? mobileStep : activeStep;
+  const steps = [
+    {
+      id: 1,
+      title: "Install Linkium",
+      desc: "Download & run the receiver on your Windows PC",
+      icon: Monitor,
+      details: [
+        { text: "One-click installer", icon: "check" },
+        { text: "Runs in system tray", icon: "check" }
+      ]
+    },
+    {
+      id: 2,
+      title: "Get Pairing Code",
+      desc: "Secure 10-digit code — no account needed",
+      icon: Lock,
+      details: [
+        { text: "End-to-end encrypted", icon: "pulse" },
+        { text: "Changes every session", icon: "check" }
+      ]
+    },
+    {
+      id: 3,
+      title: "Control Remotely",
+      desc: "Launch apps from any device, anywhere",
+      icon: Smartphone,
+      details: [
+        { text: "Real-time connection", icon: "pulse" },
+        { text: "Cross-platform support", icon: "check" }
+      ]
+    },
+  ];
+
+  // Helper function to determine if a step should show tick mark
+  const shouldShowTick = (stepId: number) => {
+    if (showTickAll) return true;
+    return activeStep > stepId;
+  };
 
   return (
-    <div className="bg-[#0E1013] text-white overflow-x-hidden">
-      {/* Animated Background */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0E1013] via-[#181A1F] to-[#090B0E]" />
-
-        {/* Animated gradient orbs */}
-        <div
-          className="absolute top-0 left-1/4 w-96 h-96 bg-[#00B4FF] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"
-          style={{ animationDelay: '0s', animationDuration: '7s' }}
-        />
-        <div
-          className="absolute top-1/3 right-1/4 w-96 h-96 bg-[#0088CC] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"
-          style={{ animationDelay: '2s', animationDuration: '9s' }}
-        />
-        <div
-          className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-[#00D4FF] rounded-full mix-blend-multiply filter blur-3xl opacity-15 animate-float"
-          style={{ animationDelay: '4s', animationDuration: '8s' }}
-        />
-
-        {/* Grid pattern */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-10" />
-
-        {/* Radial gradient overlay */}
-        <div
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 50% 50%, #00B4FF 0%, transparent 50%)',
-            transform: `translateY(${scrollY * 0.5}px)`,
-          }}
-        />
-      </div>
-
+    <div className="app-container" style={{ position: 'relative', zIndex: 2, background: 'transparent' }}>
+      {/* Network Animation Background */}
+      <NetworkBackground />
+      
       {/* Header */}
       <header className="relative z-50 border-b border-white/10 backdrop-blur-lg bg-black/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
@@ -321,17 +345,6 @@ const Home: React.FC = () => {
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 overflow-hidden pt-20 sm:pt-0">
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `url(/c14128d6c089208a0627d76c55139355.webp)`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            filter: 'blur(40px)',
-            transform: `scale(1.1) translateY(${scrollY * 0.3}px)`,
-          }}
-        />
-
         <div className="relative z-10 max-w-5xl mx-auto text-center">
           <div className="inline-block mb-4 sm:mb-6 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-[#00B4FF]/30 bg-[#00B4FF]/5 backdrop-blur-sm">
             <span className="text-[#00B4FF] text-xs sm:text-sm font-semibold">Part of Ramiz Dev Universe</span>
@@ -467,12 +480,12 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* How It Works - Mobile Optimized Version */}
+      {/* How It Works - Fully Responsive with Repeating Animation */}
       <section 
         ref={flowchartRef as React.LegacyRef<HTMLElement>}
-        className="relative py-20 sm:py-32 px-4 sm:px-6 bg-gradient-to-b from-transparent via-[#00B4FF]/5 to-transparent overflow-hidden"
+        className="relative py-20 sm:py-32 px-4 sm:px-6 bg-gradient-to-b from-transparent via-[#00B4FF]/5 to-transparent"
       >
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl sm:text-5xl font-bold text-center mb-4 bg-gradient-to-r from-white via-[#00B4FF] to-white bg-clip-text text-transparent">
             How It Works
           </h2>
@@ -480,424 +493,156 @@ const Home: React.FC = () => {
             Three simple steps to connect and control your PC from anywhere
           </p>
 
-          {/* Mobile Optimized Stepper */}
-          {isMobile ? (
-            <div className="relative">
-              {/* Progress Bar */}
-              <div className="absolute left-6 top-12 bottom-12 w-0.5 bg-[#00B4FF]/20 z-0">
-                <div 
-                  className="absolute top-0 left-0 w-full bg-gradient-to-b from-[#00B4FF] to-[#0088CC] transition-all duration-700 ease-out rounded-full"
-                  style={{ 
-                    height: `${(currentStep - 1) * 50}%`,
-                    maxHeight: currentStep >= 3 ? '100%' : '0%',
-                    opacity: currentStep >= 1 ? 1 : 0
-                  }}
-                />
-              </div>
+          <div className="space-y-8 sm:space-y-10">
+            {steps.map((step, index) => {
+              const Icon = step.icon;
+              const isActive = activeStep >= step.id;
+              const isLast = index === steps.length - 1;
+              const showTick = shouldShowTick(step.id);
 
-              {/* Step 1 */}
-              <div className={`relative flex gap-4 mb-8 transition-all duration-500 ${currentStep >= 1 ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}>
-                <div className="relative z-10">
-                  <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-[#00B4FF] to-[#0088CC] flex items-center justify-center text-white font-bold shadow-lg transition-all duration-500 ${currentStep >= 1 ? 'scale-100' : 'scale-75'}`}>
-                    {currentStep > 1 ? (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    ) : (
-                      '1'
+              return (
+                <div key={step.id} className="relative flex gap-4 sm:gap-6">
+                  {/* Left Side - Icon and Connector */}
+                  <div className="relative flex flex-col items-center">
+                    {/* Circle */}
+                    <div
+                      className={`
+                        relative z-10
+                        w-12 h-12 sm:w-16 sm:h-16 rounded-full
+                        flex items-center justify-center
+                        bg-gradient-to-br from-[#00B4FF] to-[#0088CC]
+                        shadow-lg transition-all duration-500
+                        ${isActive || showTickAll ? "scale-100" : "scale-75 opacity-50"}
+                      `}
+                    >
+                      {showTick ? (
+                        <svg
+                          className="w-5 h-5 sm:w-7 sm:h-7"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={3}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      ) : (
+                        <span className="text-base sm:text-2xl font-bold">{step.id}</span>
+                      )}
+
+                      {(isActive || showTickAll) && !showTick && (
+                        <div className="absolute inset-0 rounded-full bg-[#00B4FF] opacity-30 animate-ping" />
+                      )}
+                    </div>
+
+                    {/* Connector Line - only between steps */}
+                    {!isLast && (
+                      <div className="relative w-[2px] h-16 sm:h-24 bg-[#00B4FF]/20 overflow-hidden mt-2">
+                        <div
+                          className="absolute top-0 left-0 w-full bg-gradient-to-b from-[#00B4FF] to-[#0088CC] transition-all duration-1000 ease-out"
+                          style={{
+                            height: (activeStep > step.id || showTickAll) ? "100%" : "0%",
+                            boxShadow: "0 0 12px #00B4FF",
+                          }}
+                        />
+                      </div>
                     )}
                   </div>
-                  {currentStep >= 1 && (
-                    <div className="absolute inset-0 rounded-full animate-ping-slow opacity-30 bg-[#00B4FF]" style={{ animationDelay: '0s' }} />
-                  )}
-                </div>
-                <div className={`flex-1 bg-gradient-to-br from-[#00B4FF]/10 to-transparent rounded-2xl p-4 border border-[#00B4FF]/30 backdrop-blur-sm transition-all duration-500 ${currentStep >= 1 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                  <div className="flex items-center gap-3 mb-2">
-                    <Monitor className="w-5 h-5 text-[#00B4FF]" />
-                    <h3 className="font-bold text-lg">Install Linkium</h3>
-                  </div>
-                  <p className="text-gray-400 text-sm">Download & run the receiver on your Windows PC</p>
-                  {currentStep === 1 && (
-                    <div className="mt-3 pt-3 border-t border-[#00B4FF]/20">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-[#00B4FF] rounded-full animate-pulse"></div>
-                        <span className="text-xs text-[#00B4FF]">Ready to install</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
 
-              {/* Step 2 */}
-              <div className={`relative flex gap-4 mb-8 transition-all duration-500 delay-300 ${currentStep >= 2 ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}>
-                <div className="relative z-10">
-                  <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-[#00B4FF] to-[#0088CC] flex items-center justify-center text-white font-bold shadow-lg transition-all duration-500 ${currentStep >= 2 ? 'scale-100' : 'scale-75'}`}>
-                    {currentStep > 2 ? (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    ) : (
-                      '2'
+                  {/* Right Side - Card Content */}
+                  <div
+                    className={`
+                      flex-1 rounded-2xl p-4 sm:p-6
+                      border border-[#00B4FF]/30
+                      bg-gradient-to-br from-[#00B4FF]/10 to-transparent
+                      backdrop-blur-sm
+                      transition-all duration-500
+                      ${(isActive || showTickAll)
+                        ? "opacity-100 translate-y-0"
+                        : "opacity-50 translate-y-2"
+                      }
+                    `}
+                  >
+                    <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                      <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-[#00B4FF]" />
+                      <h3 className="text-base sm:text-xl font-bold">{step.title}</h3>
+                    </div>
+
+                    <p className="text-xs sm:text-sm text-gray-400">{step.desc}</p>
+
+                    {/* Additional details for active step */}
+                    {step.id === 1 && isActive && activeStep === 1 && !showTickAll && (
+                      <div className="mt-3 pt-3 border-t border-[#00B4FF]/20">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-[#00B4FF] rounded-full animate-pulse" />
+                          <span className="text-xs text-[#00B4FF]">Ready to install</span>
+                        </div>
+                      </div>
                     )}
-                  </div>
-                  {currentStep >= 2 && (
-                    <div className="absolute inset-0 rounded-full animate-ping-slow opacity-30 bg-[#00B4FF]" style={{ animationDelay: '0.5s' }} />
-                  )}
-                </div>
-                <div className={`flex-1 bg-gradient-to-br from-[#00B4FF]/10 to-transparent rounded-2xl p-4 border border-[#00B4FF]/30 backdrop-blur-sm transition-all duration-500 ${currentStep >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                  <div className="flex items-center gap-3 mb-2">
-                    <Lock className="w-5 h-5 text-[#00B4FF]" />
-                    <h3 className="font-bold text-lg">Get Pairing Code</h3>
-                  </div>
-                  <p className="text-gray-400 text-sm">Secure 10-digit code — no account needed</p>
-                  {currentStep === 2 && (
-                    <div className="mt-3 pt-3 border-t border-[#00B4FF]/20">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-                        <span className="text-xs text-yellow-400">Generating secure code...</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
 
-              {/* Step 3 */}
-              <div className={`relative flex gap-4 transition-all duration-500 delay-600 ${currentStep >= 3 ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}>
-                <div className="relative z-10">
-                  <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-[#00B4FF] to-[#0088CC] flex items-center justify-center text-white font-bold shadow-lg transition-all duration-500 ${currentStep >= 3 ? 'scale-100' : 'scale-75'}`}>
-                    {currentStep >= 3 ? (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    ) : (
-                      '3'
+                    {step.id === 2 && isActive && activeStep === 2 && !showTickAll && (
+                      <div className="mt-3 pt-3 border-t border-[#00B4FF]/20">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+                          <span className="text-xs text-yellow-400">Generating secure code...</span>
+                        </div>
+                      </div>
                     )}
-                  </div>
-                  {currentStep >= 3 && (
-                    <div className="absolute inset-0 rounded-full animate-ping-slow opacity-30 bg-[#00B4FF]" style={{ animationDelay: '1s' }} />
-                  )}
-                </div>
-                <div className={`flex-1 bg-gradient-to-br from-[#00B4FF]/10 to-transparent rounded-2xl p-4 border border-[#00B4FF]/30 backdrop-blur-sm transition-all duration-500 ${currentStep >= 3 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                  <div className="flex items-center gap-3 mb-2">
-                    <Smartphone className="w-5 h-5 text-[#00B4FF]" />
-                    <h3 className="font-bold text-lg">Control Remotely</h3>
-                  </div>
-                  <p className="text-gray-400 text-sm">Launch apps from any device, anywhere</p>
-                  {currentStep === 3 && (
-                    <div className="mt-3 pt-3 border-t border-[#00B4FF]/20">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                        <span className="text-xs text-green-400">Connected! Ready to control</span>
+
+                    {step.id === 3 && isActive && activeStep === 3 && !showTickAll && (
+                      <div className="mt-3 pt-3 border-t border-[#00B4FF]/20">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                          <span className="text-xs text-green-400">Connected! Ready to control</span>
+                        </div>
                       </div>
+                    )}
+
+                    {/* Details grid */}
+                    <div className="mt-3 pt-3 border-t border-[#00B4FF]/20 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {step.details.map((detail, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <div className={`w-1.5 h-1.5 rounded-full ${detail.icon === 'pulse' ? 'bg-[#00B4FF] animate-pulse' : 'bg-[#00B4FF]'}`} />
+                          <span className="text-xs text-gray-500">{detail.text}</span>
+                        </div>
+                      ))}
                     </div>
-                  )}
+                  </div>
                 </div>
+              );
+            })}
+          </div>
+
+          {/* Completion Badge */}
+          <div className={`mt-8 sm:mt-12 text-center transition-all duration-700 ${showTickAll ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+            <div className="inline-flex flex-wrap justify-center items-center gap-2 px-4 py-2 rounded-full bg-[#00B4FF]/10 border border-[#00B4FF]/30 backdrop-blur-sm">
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-[#2ECC71] rounded-full animate-pulse" />
+                <span className="text-xs sm:text-sm text-gray-300">Active connection</span>
               </div>
-
-              {/* Completion Badge */}
-              <div className={`mt-8 text-center transition-all duration-700 ${currentStep >= 3 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                <div className="inline-flex flex-wrap justify-center items-center gap-2 px-4 py-2 rounded-full bg-[#00B4FF]/10 border border-[#00B4FF]/30 backdrop-blur-sm">
-                  <div className="w-2 h-2 bg-[#2ECC71] rounded-full animate-pulse"></div>
-                  <span className="text-xs text-gray-300">Active connection</span>
-                  <div className="w-px h-3 bg-[#00B4FF]/30"></div>
-                  <Lock className="w-3 h-3 text-[#2ECC71]" />
-                  <span className="text-xs text-gray-300">End-to-end encrypted</span>
-                </div>
-              </div>
-
-              <div className={`mt-6 text-center transition-all duration-700 delay-300 ${currentStep >= 3 ? 'opacity-100' : 'opacity-0'}`}>
-                <p className="text-sm text-gray-300">
-                  That's it. <span className="text-[#00B4FF] font-semibold">No accounts, no subscriptions.</span>
-                </p>
-              </div>
-            </div>
-          ) : (
-            /* Desktop Animated Flowchart */
-            <div className="relative min-h-[600px] md:min-h-[500px]">
-              {/* SVG Connecting Lines - Animated drawing effect */}
-              <div className="hidden md:block absolute inset-0 z-0 pointer-events-none" style={{ top: '15%', height: '70%' }}>
-                <svg className="w-full h-full" viewBox="0 0 1000 400" preserveAspectRatio="none">
-                  <defs>
-                    <linearGradient id="lineGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#00B4FF" stopOpacity="0.8" />
-                      <stop offset="100%" stopColor="#0088CC" stopOpacity="1">
-                        <animate attributeName="stop-opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite" />
-                      </stop>
-                    </linearGradient>
-                    <linearGradient id="lineGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#0088CC" stopOpacity="1" />
-                      <stop offset="100%" stopColor="#00B4FF" stopOpacity="0.8">
-                        <animate attributeName="stop-opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite" />
-                      </stop>
-                    </linearGradient>
-                    <filter id="glowLine" x="-20%" y="-20%" width="140%" height="140%">
-                      <feGaussianBlur stdDeviation="4" result="blur" />
-                      <feMerge>
-                        <feMergeNode in="blur" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-                  </defs>
-
-                  {/* Line 1: Step 1 to Step 2 */}
-                  <g filter="url(#glowLine)">
-                    <line
-                      x1="180"
-                      y1="60"
-                      x2="500"
-                      y2="60"
-                      stroke="rgba(0,180,255,0.15)"
-                      strokeWidth="3"
-                      strokeDasharray="8,8"
-                    />
-                    <line
-                      x1="180"
-                      y1="60"
-                      x2="500"
-                      y2="60"
-                      stroke="url(#lineGrad1)"
-                      strokeWidth="3"
-                      strokeDasharray={`${(activeStep - 1) * 320}, 1000`}
-                      strokeLinecap="round"
-                      style={{ transition: 'stroke-dasharray 0.8s ease-out' }}
-                    />
-                    <circle r="4" fill="#00B4FF" opacity="0.9">
-                      <animateMotion dur="2s" repeatCount="indefinite" path="M180,60 L500,60" begin="0s" />
-                    </circle>
-                    <polygon 
-                      points="495,54 510,60 495,66" 
-                      fill="#00B4FF"
-                      opacity={activeStep > 1 ? 1 : 0}
-                      style={{ transition: 'opacity 0.3s ease' }}
-                    />
-                  </g>
-
-                  {/* Line 2: Step 2 to Step 3 */}
-                  <g filter="url(#glowLine)">
-                    <line
-                      x1="500"
-                      y1="60"
-                      x2="820"
-                      y2="60"
-                      stroke="rgba(0,180,255,0.15)"
-                      strokeWidth="3"
-                      strokeDasharray="8,8"
-                    />
-                    <line
-                      x1="500"
-                      y1="60"
-                      x2="820"
-                      y2="60"
-                      stroke="url(#lineGrad2)"
-                      strokeWidth="3"
-                      strokeDasharray={`${(activeStep - 2) * 320}, 1000`}
-                      strokeLinecap="round"
-                      style={{ transition: 'stroke-dasharray 0.8s ease-out 0.3s' }}
-                    />
-                    <circle r="4" fill="#0088CC" opacity="0.9">
-                      <animateMotion dur="2s" repeatCount="indefinite" path="M500,60 L820,60" begin="0.5s" />
-                    </circle>
-                    <polygon 
-                      points="815,54 830,60 815,66" 
-                      fill="#0088CC"
-                      opacity={activeStep > 2 ? 1 : 0}
-                      style={{ transition: 'opacity 0.3s ease' }}
-                    />
-                  </g>
+              <div className="w-px h-3 bg-[#00B4FF]/30 hidden sm:block" />
+              <div className="flex items-center gap-1">
+                <svg className="w-3 h-3 sm:w-4 sm:h-4 text-[#00B4FF] animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
+                <span className="text-xs sm:text-sm text-gray-300 hidden sm:inline">Zero-delay cloud relay</span>
               </div>
-
-              {/* Steps Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 relative z-10">
-                {/* Step 1 */}
-                <div className={`transform transition-all duration-700 ${activeStep >= 1 ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
-                  <div className="group relative text-center">
-                    {activeStep >= 1 && (
-                      <div className="absolute inset-0 rounded-full animate-ping-slow opacity-30 bg-[#00B4FF] -z-10" 
-                           style={{ width: '88px', height: '88px', left: '50%', transform: 'translateX(-50%)', top: '-6px' }} />
-                    )}
-                    
-                    <div className="relative inline-block mb-6">
-                      <div className={`w-20 h-20 sm:w-24 sm:h-24 mx-auto bg-gradient-to-br from-[#00B4FF] to-[#0088CC] rounded-full flex items-center justify-center text-3xl sm:text-4xl font-bold shadow-[0_0_40px_rgba(0,180,255,0.5)] transition-all duration-500 ${activeStep >= 1 ? 'scale-100' : 'scale-75'}`}>
-                        1
-                        {activeStep >= 1 && (
-                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full text-xs flex items-center justify-center animate-bounce-in">
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className={`p-6 rounded-2xl border border-[#00B4FF]/30 bg-gradient-to-b from-[#00B4FF]/10 to-transparent backdrop-blur-sm transition-all duration-500 group-hover:scale-105 group-hover:border-[#00B4FF]/60 group-hover:shadow-[0_0_40px_rgba(0,180,255,0.3)] ${activeStep >= 1 ? 'opacity-100' : 'opacity-0'}`}>
-                      <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 bg-gradient-to-br from-[#00B4FF]/20 to-transparent rounded-xl flex items-center justify-center border border-[#00B4FF]/30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                        <Monitor className="w-8 h-8 sm:w-10 sm:h-10 text-[#00B4FF] group-hover:text-white transition-colors" />
-                      </div>
-                      <h3 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-to-r from-white to-[#00B4FF] bg-clip-text text-transparent">
-                        Install Linkium
-                      </h3>
-                      <p className="text-gray-400">Download & run the receiver on your Windows PC</p>
-                      
-                      {activeStep === 1 && (
-                        <div className="mt-4 pt-4 border-t border-[#00B4FF]/20">
-                          <div className="flex items-center justify-center gap-2">
-                            <div className="w-2 h-2 bg-[#00B4FF] rounded-full animate-pulse"></div>
-                            <span className="text-xs text-[#00B4FF]">Installing...</span>
-                          </div>
-                        </div>
-                      )}
-                      
-                      <div className="mt-4 pt-4 border-t border-[#00B4FF]/20 text-left">
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                          <div className="w-1.5 h-1.5 bg-[#00B4FF] rounded-full"></div>
-                          <span>One-click installer</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                          <div className="w-1.5 h-1.5 bg-[#00B4FF] rounded-full"></div>
-                          <span>Runs in system tray</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Step 2 */}
-                <div className={`transform transition-all duration-700 delay-300 ${activeStep >= 2 ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
-                  <div className="group relative text-center">
-                    {activeStep >= 2 && (
-                      <div className="absolute inset-0 rounded-full animate-ping-slow opacity-30 bg-[#00B4FF] -z-10" 
-                           style={{ width: '88px', height: '88px', left: '50%', transform: 'translateX(-50%)', top: '-6px', animationDelay: '0.5s' }} />
-                    )}
-                    
-                    <div className="relative inline-block mb-6">
-                      <div className={`w-20 h-20 sm:w-24 sm:h-24 mx-auto bg-gradient-to-br from-[#00B4FF] to-[#0088CC] rounded-full flex items-center justify-center text-3xl sm:text-4xl font-bold shadow-[0_0_40px_rgba(0,180,255,0.5)] transition-all duration-500 ${activeStep >= 2 ? 'scale-100' : 'scale-75'}`}>
-                        2
-                        {activeStep >= 2 && (
-                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-500 rounded-full text-xs flex items-center justify-center animate-bounce-in">
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className={`p-6 rounded-2xl border border-[#00B4FF]/30 bg-gradient-to-b from-[#00B4FF]/10 to-transparent backdrop-blur-sm transition-all duration-500 group-hover:scale-105 group-hover:border-[#00B4FF]/60 group-hover:shadow-[0_0_40px_rgba(0,180,255,0.3)] ${activeStep >= 2 ? 'opacity-100' : 'opacity-0'}`}>
-                      <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 bg-gradient-to-br from-[#00B4FF]/20 to-transparent rounded-xl flex items-center justify-center border border-[#00B4FF]/30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                        <Lock className="w-8 h-8 sm:w-10 sm:h-10 text-[#00B4FF] group-hover:text-white transition-colors" />
-                      </div>
-                      <h3 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-to-r from-white to-[#00B4FF] bg-clip-text text-transparent">
-                        Get Pairing Code
-                      </h3>
-                      <p className="text-gray-400">Secure 10-digit code — no account needed</p>
-                      
-                      {activeStep === 2 && (
-                        <div className="mt-4 pt-4 border-t border-[#00B4FF]/20">
-                          <div className="flex items-center justify-center gap-2">
-                            <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-                            <span className="text-xs text-yellow-400">Generating secure code...</span>
-                          </div>
-                        </div>
-                      )}
-                      
-                      <div className="mt-4 pt-4 border-t border-[#00B4FF]/20 text-left">
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                          <div className="w-1.5 h-1.5 bg-[#00B4FF] rounded-full animate-pulse"></div>
-                          <span>End-to-end encrypted</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                          <div className="w-1.5 h-1.5 bg-[#00B4FF] rounded-full"></div>
-                          <span>Changes every session</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Step 3 */}
-                <div className={`transform transition-all duration-700 delay-500 ${activeStep >= 3 ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
-                  <div className="group relative text-center">
-                    {activeStep >= 3 && (
-                      <div className="absolute inset-0 rounded-full animate-ping-slow opacity-30 bg-[#00B4FF] -z-10" 
-                           style={{ width: '88px', height: '88px', left: '50%', transform: 'translateX(-50%)', top: '-6px', animationDelay: '1s' }} />
-                    )}
-                    
-                    <div className="relative inline-block mb-6">
-                      <div className={`w-20 h-20 sm:w-24 sm:h-24 mx-auto bg-gradient-to-br from-[#00B4FF] to-[#0088CC] rounded-full flex items-center justify-center text-3xl sm:text-4xl font-bold shadow-[0_0_40px_rgba(0,180,255,0.5)] transition-all duration-500 ${activeStep >= 3 ? 'scale-100' : 'scale-75'}`}>
-                        3
-                        {activeStep >= 3 && (
-                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-purple-500 rounded-full text-xs flex items-center justify-center animate-bounce-in">
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className={`p-6 rounded-2xl border border-[#00B4FF]/30 bg-gradient-to-b from-[#00B4FF]/10 to-transparent backdrop-blur-sm transition-all duration-500 group-hover:scale-105 group-hover:border-[#00B4FF]/60 group-hover:shadow-[0_0_40px_rgba(0,180,255,0.3)] ${activeStep >= 3 ? 'opacity-100' : 'opacity-0'}`}>
-                      <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 bg-gradient-to-br from-[#00B4FF]/20 to-transparent rounded-xl flex items-center justify-center border border-[#00B4FF]/30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                        <Smartphone className="w-8 h-8 sm:w-10 sm:h-10 text-[#00B4FF] group-hover:text-white transition-colors" />
-                      </div>
-                      <h3 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-to-r from-white to-[#00B4FF] bg-clip-text text-transparent">
-                        Control Remotely
-                      </h3>
-                      <p className="text-gray-400">Launch apps from any device, anywhere</p>
-                      
-                      {activeStep === 3 && (
-                        <div className="mt-4 pt-4 border-t border-[#00B4FF]/20">
-                          <div className="flex items-center justify-center gap-2">
-                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                            <span className="text-xs text-green-400">Connected! Ready to control</span>
-                          </div>
-                        </div>
-                      )}
-                      
-                      <div className="mt-4 pt-4 border-t border-[#00B4FF]/20 text-left">
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                          <div className="w-1.5 h-1.5 bg-[#00B4FF] rounded-full animate-pulse"></div>
-                          <span>Real-time connection</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                          <div className="w-1.5 h-1.5 bg-[#00B4FF] rounded-full"></div>
-                          <span>Cross-platform support</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Completion message */}
-              <div className={`mt-12 text-center transition-all duration-1000 ${activeStep >= 3 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                <div className="inline-flex flex-wrap justify-center items-center gap-3 px-6 py-3 rounded-full bg-[#00B4FF]/10 border border-[#00B4FF]/30 backdrop-blur-sm">
-                  <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-[#2ECC71] rounded-full animate-pulse"></div>
-                    <span className="text-sm text-gray-300">Active connection</span>
-                  </div>
-                  <div className="w-px h-4 bg-[#00B4FF]/30"></div>
-                  <div className="flex items-center gap-1">
-                    <svg className="w-4 h-4 text-[#00B4FF] animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    <span className="text-sm text-gray-300">Zero-delay cloud relay</span>
-                  </div>
-                  <div className="w-px h-4 bg-[#00B4FF]/30"></div>
-                  <div className="flex items-center gap-1">
-                    <Lock className="w-3 h-3 text-[#2ECC71]" />
-                    <span className="text-sm text-gray-300">End-to-end encrypted</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className={`mt-8 text-center transition-all duration-1000 delay-300 ${activeStep >= 3 ? 'opacity-100' : 'opacity-0'}`}>
-                <p className="text-base sm:text-xl text-gray-300 px-4">
-                  That's it. <span className="text-[#00B4FF] font-semibold">No accounts, no subscriptions, no complexity.</span>
-                </p>
+              <div className="w-px h-3 bg-[#00B4FF]/30 hidden sm:block" />
+              <div className="flex items-center gap-1">
+                <Lock className="w-3 h-3 text-[#2ECC71]" />
+                <span className="text-xs sm:text-sm text-gray-300">End-to-end encrypted</span>
               </div>
             </div>
-          )}
+          </div>
+
+          <div className={`mt-6 text-center transition-all duration-700 delay-300 ${showTickAll ? 'opacity-100' : 'opacity-0'}`}>
+            <p className="text-sm sm:text-base text-gray-300">
+              That's it. <span className="text-[#00B4FF] font-semibold">No accounts, no subscriptions.</span>
+            </p>
+          </div>
         </div>
       </section>
 
@@ -987,17 +732,17 @@ const Home: React.FC = () => {
                 href="https://github.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-white/10 flex items-center justify-center hover:border-[#00B4FF] hover:bg-[#00B4FF]/10 transition-all"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-white/10 flex items-center justify-center hover:border-[#00B4FF] hover:bg-[#00B4FF]/10 transition-all group"
               >
-                <Github className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Github className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:text-[#00B4FF] transition-colors" />
               </a>
               <a
                 href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-white/10 flex items-center justify-center hover:border-[#00B4FF] hover:bg-[#00B4FF]/10 transition-all"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-white/10 flex items-center justify-center hover:border-[#00B4FF] hover:bg-[#00B4FF]/10 transition-all group"
               >
-                <Twitter className="w-4 h-4 sm:w-5 sm:h-5" />
+                <XIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:text-[#00B4FF] transition-colors" />
               </a>
             </div>
           </div>
@@ -1013,57 +758,8 @@ const Home: React.FC = () => {
           </div>
         </div>
       </footer>
-
-      {/* Global CSS Animations */}
-      <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(2deg); }
-        }
-        .animate-float {
-          animation: float 8s ease-in-out infinite;
-        }
-        
-        @keyframes ping-slow {
-          0% { transform: scale(0.8); opacity: 0.5; }
-          75%, 100% { transform: scale(1.5); opacity: 0; }
-        }
-        .animate-ping-slow {
-          animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-        }
-        
-        @keyframes bounce-in {
-          0% { transform: scale(0); opacity: 0; }
-          50% { transform: scale(1.2); }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        .animate-bounce-in {
-          animation: bounce-in 0.4s ease-out forwards;
-        }
-        
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        .animate-spin-slow {
-          animation: spin-slow 3s linear infinite;
-        }
-        
-        @keyframes pulse-glow {
-          0%, 100% { box-shadow: 0 0 20px rgba(0, 180, 255, 0.4); }
-          50% { box-shadow: 0 0 50px rgba(0, 180, 255, 0.8); }
-        }
-        .animate-pulse-glow {
-          animation: pulse-glow 2s ease-in-out infinite;
-        }
-        
-        .bg-grid-pattern {
-          background-image: linear-gradient(rgba(0, 180, 255, 0.08) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 180, 255, 0.08) 1px, transparent 1px);
-          background-size: 60px 60px;
-        }
-      `}</style>
     </div>
   );
 };
+
 export default Home;
