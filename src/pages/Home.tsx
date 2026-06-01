@@ -46,6 +46,19 @@ interface Testimonial {
   role: string;
 }
 
+interface StepDetail {
+  text: string;
+  icon: string;
+}
+
+interface Step {
+  id: number;
+  title: string;
+  desc: string;
+  icon: React.FC<React.SVGProps<SVGSVGElement>>;
+  details: StepDetail[];
+}
+
 // Custom X (Twitter) Icon Component
 const XIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg
@@ -60,7 +73,7 @@ const XIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 // Custom hook to detect when an element is in viewport
 const useInView = (options?: IntersectionObserverInit) => {
-  const [isInView, setIsInView] = useState(false);
+  const [isInView, setIsInView] = useState<boolean>(false);
   const ref = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -84,15 +97,99 @@ const useInView = (options?: IntersectionObserverInit) => {
 const Home: React.FC = () => {
   const [scrollY, setScrollY] = useState<number>(0);
   const { ref: flowchartRef, isInView: isFlowchartInView } = useInView({ threshold: 0.15 });
-  const [activeStep, setActiveStep] = useState(0);
-  const [showTickAll, setShowTickAll] = useState(false);
-  const animationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [activeStep, setActiveStep] = useState<number>(0);
+  const [showTickAll, setShowTickAll] = useState<boolean>(false);
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isAnimatingRef = useRef<boolean>(false);
 
-  // Unified flowchart animation effect with repeat
+  // Security: Disable right-click and view source
   useEffect(() => {
-    if (isFlowchartInView) {
-      // Start the animation sequence
-      const startAnimation = () => {
+    // Disable right-click
+    const disableRightClick = (e: MouseEvent): void => {
+      e.preventDefault();
+      return;
+    };
+
+    // Disable keyboard shortcuts
+    const disableKeyboardShortcuts = (e: KeyboardEvent): void => {
+      // Disable Ctrl+U (View Source)
+      if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
+        e.preventDefault();
+        return;
+      }
+      
+      // Disable Ctrl+Shift+I (Developer Tools)
+      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
+        e.preventDefault();
+        return;
+      }
+      
+      // Disable F12 (Developer Tools)
+      if (e.key === 'F12') {
+        e.preventDefault();
+        return;
+      }
+      
+      // Disable Ctrl+Shift+C (Inspect Element)
+      if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
+        e.preventDefault();
+        return;
+      }
+      
+      // Disable Ctrl+Shift+J (Console)
+      if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j')) {
+        e.preventDefault();
+        return;
+      }
+      
+      // Disable Ctrl+S (Save Page)
+      if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
+        e.preventDefault();
+        return;
+      }
+      
+      // Disable Ctrl+P (Print)
+      if (e.ctrlKey && (e.key === 'p' || e.key === 'P')) {
+        e.preventDefault();
+        return;
+      }
+    };
+
+    // Add event listeners
+    document.addEventListener('contextmenu', disableRightClick);
+    document.addEventListener('keydown', disableKeyboardShortcuts);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('contextmenu', disableRightClick);
+      document.removeEventListener('keydown', disableKeyboardShortcuts);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = (): void => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Cleanup function for timeouts
+  const clearAllTimeouts = (): void => {
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current);
+      animationTimeoutRef.current = null;
+    }
+  };
+
+  // Unified flowchart animation effect with proper cleanup
+  useEffect(() => {
+    // Clear any existing animation when component unmounts or view changes
+    clearAllTimeouts();
+    
+    if (isFlowchartInView && !isAnimatingRef.current) {
+      isAnimatingRef.current = true;
+      
+      // Start animation sequence
+      const animateSteps = (): void => {
         setActiveStep(1);
         setShowTickAll(false);
         
@@ -102,42 +199,47 @@ const Home: React.FC = () => {
           setShowTickAll(true);
         }, 3000);
         
-        // Reset and repeat after 5 seconds of showing ticks
+        // Reset and repeat after 8 seconds
         const repeatTimer = setTimeout(() => {
-          setActiveStep(0);
-          setShowTickAll(false);
-          startAnimation();
+          if (isFlowchartInView) {
+            setActiveStep(0);
+            setShowTickAll(false);
+            animateSteps();
+          } else {
+            isAnimatingRef.current = false;
+          }
         }, 8000);
         
-        return () => {
+        // Store all timeouts for cleanup
+        animationTimeoutRef.current = step2Timer as unknown as NodeJS.Timeout;
+        
+        // Cleanup function for this animation cycle
+        const cleanup = (): void => {
           clearTimeout(step2Timer);
           clearTimeout(step3Timer);
           clearTimeout(completionTimer);
           clearTimeout(repeatTimer);
         };
-      };
-      
-      animationIntervalRef.current = startAnimation() as unknown as NodeJS.Timeout;
-      
-      return () => {
-        if (animationIntervalRef.current) {
-          clearTimeout(animationIntervalRef.current);
+        
+        // Store cleanup reference
+        if (animationTimeoutRef.current) {
+          (animationTimeoutRef.current as any).cleanup = cleanup;
         }
       };
-    } else {
+      
+      animateSteps();
+    } else if (!isFlowchartInView) {
+      // Reset animation when out of view
       setActiveStep(0);
       setShowTickAll(false);
-      if (animationIntervalRef.current) {
-        clearTimeout(animationIntervalRef.current);
-      }
+      isAnimatingRef.current = false;
     }
+    
+    return () => {
+      clearAllTimeouts();
+      isAnimatingRef.current = false;
+    };
   }, [isFlowchartInView]);
-
-  useEffect(() => {
-    const handleScroll = (): void => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const handleDownload = useCallback((): void => {
     const link = document.createElement('a');
@@ -261,7 +363,7 @@ const Home: React.FC = () => {
     },
   ];
 
-  const steps = [
+  const steps: Step[] = [
     {
       id: 1,
       title: "Install Linkium",
@@ -295,7 +397,7 @@ const Home: React.FC = () => {
   ];
 
   // Helper function to determine if a step should show tick mark
-  const shouldShowTick = (stepId: number) => {
+  const shouldShowTick = (stepId: number): boolean => {
     if (showTickAll) return true;
     return activeStep > stepId;
   };
@@ -480,7 +582,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* How It Works - Fully Responsive with Repeating Animation */}
+      {/* How It Works - Fully Responsive with Fixed Animation */}
       <section 
         ref={flowchartRef as React.LegacyRef<HTMLElement>}
         className="relative py-20 sm:py-32 px-4 sm:px-6 bg-gradient-to-b from-transparent via-[#00B4FF]/5 to-transparent"
@@ -512,7 +614,7 @@ const Home: React.FC = () => {
                         flex items-center justify-center
                         bg-gradient-to-br from-[#00B4FF] to-[#0088CC]
                         shadow-lg transition-all duration-500
-                        ${isActive || showTickAll ? "scale-100" : "scale-75 opacity-50"}
+                        ${(isActive || showTickAll) ? "scale-100" : "scale-75 opacity-50"}
                       `}
                     >
                       {showTick ? (
@@ -732,14 +834,16 @@ const Home: React.FC = () => {
                 href="https://github.com"
                 target="_blank"
                 rel="noopener noreferrer"
+                 aria-label="GitHub"
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-white/10 flex items-center justify-center hover:border-[#00B4FF] hover:bg-[#00B4FF]/10 transition-all group"
               >
                 <Github className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:text-[#00B4FF] transition-colors" />
               </a>
               <a
-                href="https://X.com"
+                href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="X"
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-white/10 flex items-center justify-center hover:border-[#00B4FF] hover:bg-[#00B4FF]/10 transition-all group"
               >
                 <XIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:text-[#00B4FF] transition-colors" />
@@ -747,12 +851,17 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-            <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs sm:text-sm text-gray-400">
-              <p className="leading-relaxed">
-                © 2026 Linkium. All rights reserved to Mohammad Ramiz.<br />
-                <strong>Architecture & Core Developer:</strong> Mohammad Ramiz<br />
+          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs sm:text-sm text-gray-400">
+            <div className="text-center md:text-left">
+              <p>© 2026 Linkium. All rights reserved to Mohammad Ramiz.</p>
+              <p className="mt-1">
+                <strong>Architecture & Core Developer:</strong> Mohammad Ramiz
+              </p>
+              <p>
                 <strong>UI/UX Designer:</strong> Abhishek Mondal
               </p>
+            </div>
+
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
               <Link to="/support" className="hover:text-[#00B4FF] transition-colors">Contact</Link>
               <Link to="/privacy" className="hover:text-[#00B4FF] transition-colors">Privacy</Link>
