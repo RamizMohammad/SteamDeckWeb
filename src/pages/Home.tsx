@@ -86,7 +86,7 @@ const Home: React.FC = () => {
   const { ref: flowchartRef, isInView: isFlowchartInView } = useInView({ threshold: 0.15 });
   const [activeStep, setActiveStep] = useState(0);
   const [showTickAll, setShowTickAll] = useState(false);
-  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const animationTimeoutRef = useRef<NodeJS.Timeout[]>([]);
   const isAnimatingRef = useRef(false);
 
   useEffect(() => {
@@ -97,11 +97,179 @@ const Home: React.FC = () => {
 
   // Cleanup function for timeouts
   const clearAllTimeouts = () => {
-    if (animationTimeoutRef.current) {
-      clearTimeout(animationTimeoutRef.current);
-      animationTimeoutRef.current = null;
-    }
+    animationTimeoutRef.current.forEach(timeout => clearTimeout(timeout));
+    animationTimeoutRef.current = [];
   };
+
+  // Comprehensive anti-inspect protection
+  useEffect(() => {
+    // Only apply in production
+    if (process.env.NODE_ENV === 'production') {
+      
+      // 1. Disable right-click
+      const handleContextMenu = (e: MouseEvent) => {
+        e.preventDefault();
+        return false;
+      };
+
+      // 2. Disable all keyboard shortcuts for dev tools
+      const handleKeyDown = (e: KeyboardEvent) => {
+        // Prevent F12
+        if (e.key === 'F12') {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
+        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+U (view source)
+        if (e.ctrlKey && e.key === 'u') {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+Shift+U
+        if (e.ctrlKey && e.shiftKey && e.key === 'U') {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+Shift+K (Firefox)
+        if (e.ctrlKey && e.shiftKey && e.key === 'K') {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+Shift+S
+        if (e.ctrlKey && e.shiftKey && e.key === 'S') {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+Shift+E
+        if (e.ctrlKey && e.shiftKey && e.key === 'E') {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+Shift+P (Command Palette)
+        if (e.ctrlKey && e.shiftKey && e.key === 'P') {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+Shift+D (Bookmark all tabs)
+        if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+S (Save page)
+        if (e.ctrlKey && e.key === 's') {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+P (Print)
+        if (e.ctrlKey && e.key === 'p') {
+          e.preventDefault();
+          return false;
+        }
+      };
+
+      // 3. Disable debugger statements and detect dev tools
+      let devToolsOpen = false;
+      const detectDevTools = () => {
+        const start = performance.now();
+        debugger;
+        const end = performance.now();
+        if (end - start > 100 || devToolsOpen) {
+          devToolsOpen = true;
+          // Clear the page content when dev tools is detected
+          document.body.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:black;color:white;display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;"><h1>⚠️ Developer Tools Detected!</h1><p>Please close Developer Tools to continue.</p><button onclick="location.reload()" style="margin-top:20px;padding:10px20px;background:#00B4FF;border:none;border-radius:5px;cursor:pointer;">Refresh Page</button></div>';
+          setTimeout(() => {
+            window.location.reload();
+          }, 5000);
+        }
+      };
+
+      // 4. Override console methods (makes console less useful)
+      if (typeof window !== 'undefined') {
+        const noop = () => {};
+        const consoleMethods = ['log', 'info', 'warn', 'error', 'debug', 'trace', 'table', 'group', 'groupCollapsed', 'groupEnd', 'dir', 'dirxml', 'profile', 'profileEnd', 'time', 'timeEnd', 'timeStamp', 'assert'];
+        consoleMethods.forEach(method => {
+          if (console[method]) {
+            try {
+              console[method] = noop;
+            } catch(e) {}
+          }
+        });
+      }
+
+      // 5. Prevent selection and copying
+      const handleSelect = (e: Event) => {
+        e.preventDefault();
+        return false;
+      };
+
+      // 6. Monitor for dev tools opening via window resize
+      let widthThreshold = window.outerWidth - window.innerWidth > 160;
+      let heightThreshold = window.outerHeight - window.innerHeight > 160;
+      const handleResize = () => {
+        if (!widthThreshold && !heightThreshold) {
+          widthThreshold = window.outerWidth - window.innerWidth > 160;
+          heightThreshold = window.outerHeight - window.innerHeight > 160;
+          if (widthThreshold || heightThreshold) {
+            document.body.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:black;color:white;display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;"><h1>⚠️ Developer Tools Detected!</h1><p>Please close Developer Tools to continue.</p><button onclick="location.reload()" style="margin-top:20px;padding:10px 20px;background:#00B4FF;border:none;border-radius:5px;cursor:pointer;">Refresh Page</button></div>';
+            setTimeout(() => {
+              window.location.reload();
+            }, 5000);
+          }
+        }
+      };
+
+      // 7. Disable source map loading
+      const originalError = window.onerror;
+      window.onerror = (message, source, lineno, colno, error) => {
+        if (source && (source.includes('.map') || source.includes('chrome-extension'))) {
+          return true;
+        }
+        if (originalError) {
+          return originalError(message, source, lineno, colno, error);
+        }
+        return false;
+      };
+
+      // 8. Prevent dragging of images and content
+      const handleDragStart = (e: DragEvent) => {
+        e.preventDefault();
+        return false;
+      };
+
+      // 9. Disable copy/paste
+      const handleCopy = (e: ClipboardEvent) => {
+        e.preventDefault();
+        return false;
+      };
+
+      // Add event listeners
+      document.addEventListener('contextmenu', handleContextMenu);
+      document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('selectstart', handleSelect);
+      document.addEventListener('dragstart', handleDragStart);
+      document.addEventListener('copy', handleCopy);
+      window.addEventListener('resize', handleResize);
+      
+      // Start dev tools detection interval
+      const detectionInterval = setInterval(detectDevTools, 2000);
+      
+      // Cleanup
+      return () => {
+        document.removeEventListener('contextmenu', handleContextMenu);
+        document.removeEventListener('keydown', handleKeyDown);
+        document.removeEventListener('selectstart', handleSelect);
+        document.removeEventListener('dragstart', handleDragStart);
+        document.removeEventListener('copy', handleCopy);
+        window.removeEventListener('resize', handleResize);
+        clearInterval(detectionInterval);
+        window.onerror = originalError;
+      };
+    }
+  }, []);
 
   // Unified flowchart animation effect with proper cleanup
   useEffect(() => {
@@ -134,14 +302,7 @@ const Home: React.FC = () => {
         }, 8000);
         
         // Store all timeouts for cleanup
-        animationTimeoutRef.current = step2Timer as unknown as NodeJS.Timeout;
-        
-        return () => {
-          clearTimeout(step2Timer);
-          clearTimeout(step3Timer);
-          clearTimeout(completionTimer);
-          clearTimeout(repeatTimer);
-        };
+        animationTimeoutRef.current.push(step2Timer, step3Timer, completionTimer, repeatTimer);
       };
       
       animateSteps();

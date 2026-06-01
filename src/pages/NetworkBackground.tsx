@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 class Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  size: number;
+  x!: number;
+  y!: number;
+  vx!: number;
+  vy!: number;
+  size!: number;
   
   constructor(width: number, height: number, isMobile: boolean, isTablet: boolean) {
     this.reset(width, height, isMobile, isTablet);
