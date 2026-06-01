@@ -46,19 +46,6 @@ interface Testimonial {
   role: string;
 }
 
-interface StepDetail {
-  text: string;
-  icon: string;
-}
-
-interface Step {
-  id: number;
-  title: string;
-  desc: string;
-  icon: React.FC<React.SVGProps<SVGSVGElement>>;
-  details: StepDetail[];
-}
-
 // Custom X (Twitter) Icon Component
 const XIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg
@@ -73,7 +60,7 @@ const XIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 // Custom hook to detect when an element is in viewport
 const useInView = (options?: IntersectionObserverInit) => {
-  const [isInView, setIsInView] = useState<boolean>(false);
+  const [isInView, setIsInView] = useState(false);
   const ref = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -97,74 +84,10 @@ const useInView = (options?: IntersectionObserverInit) => {
 const Home: React.FC = () => {
   const [scrollY, setScrollY] = useState<number>(0);
   const { ref: flowchartRef, isInView: isFlowchartInView } = useInView({ threshold: 0.15 });
-  const [activeStep, setActiveStep] = useState<number>(0);
-  const [showTickAll, setShowTickAll] = useState<boolean>(false);
+  const [activeStep, setActiveStep] = useState(0);
+  const [showTickAll, setShowTickAll] = useState(false);
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isAnimatingRef = useRef<boolean>(false);
-
-  // Security: Disable right-click and view source
-  useEffect(() => {
-    // Disable right-click
-    const disableRightClick = (e: MouseEvent): void => {
-      e.preventDefault();
-      return;
-    };
-
-    // Disable keyboard shortcuts
-    const disableKeyboardShortcuts = (e: KeyboardEvent): void => {
-      // Disable Ctrl+U (View Source)
-      if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
-        e.preventDefault();
-        return;
-      }
-      
-      // Disable Ctrl+Shift+I (Developer Tools)
-      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
-        e.preventDefault();
-        return;
-      }
-      
-      // Disable F12 (Developer Tools)
-      if (e.key === 'F12') {
-        e.preventDefault();
-        return;
-      }
-      
-      // Disable Ctrl+Shift+C (Inspect Element)
-      if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
-        e.preventDefault();
-        return;
-      }
-      
-      // Disable Ctrl+Shift+J (Console)
-      if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j')) {
-        e.preventDefault();
-        return;
-      }
-      
-      // Disable Ctrl+S (Save Page)
-      if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
-        e.preventDefault();
-        return;
-      }
-      
-      // Disable Ctrl+P (Print)
-      if (e.ctrlKey && (e.key === 'p' || e.key === 'P')) {
-        e.preventDefault();
-        return;
-      }
-    };
-
-    // Add event listeners
-    document.addEventListener('contextmenu', disableRightClick);
-    document.addEventListener('keydown', disableKeyboardShortcuts);
-
-    // Cleanup
-    return () => {
-      document.removeEventListener('contextmenu', disableRightClick);
-      document.removeEventListener('keydown', disableKeyboardShortcuts);
-    };
-  }, []);
+  const isAnimatingRef = useRef(false);
 
   useEffect(() => {
     const handleScroll = (): void => setScrollY(window.scrollY);
@@ -173,7 +96,7 @@ const Home: React.FC = () => {
   }, []);
 
   // Cleanup function for timeouts
-  const clearAllTimeouts = (): void => {
+  const clearAllTimeouts = () => {
     if (animationTimeoutRef.current) {
       clearTimeout(animationTimeoutRef.current);
       animationTimeoutRef.current = null;
@@ -189,7 +112,7 @@ const Home: React.FC = () => {
       isAnimatingRef.current = true;
       
       // Start animation sequence
-      const animateSteps = (): void => {
+      const animateSteps = () => {
         setActiveStep(1);
         setShowTickAll(false);
         
@@ -213,18 +136,12 @@ const Home: React.FC = () => {
         // Store all timeouts for cleanup
         animationTimeoutRef.current = step2Timer as unknown as NodeJS.Timeout;
         
-        // Cleanup function for this animation cycle
-        const cleanup = (): void => {
+        return () => {
           clearTimeout(step2Timer);
           clearTimeout(step3Timer);
           clearTimeout(completionTimer);
           clearTimeout(repeatTimer);
         };
-        
-        // Store cleanup reference
-        if (animationTimeoutRef.current) {
-          (animationTimeoutRef.current as any).cleanup = cleanup;
-        }
       };
       
       animateSteps();
@@ -363,7 +280,7 @@ const Home: React.FC = () => {
     },
   ];
 
-  const steps: Step[] = [
+  const steps = [
     {
       id: 1,
       title: "Install Linkium",
@@ -397,7 +314,7 @@ const Home: React.FC = () => {
   ];
 
   // Helper function to determine if a step should show tick mark
-  const shouldShowTick = (stepId: number): boolean => {
+  const shouldShowTick = (stepId: number) => {
     if (showTickAll) return true;
     return activeStep > stepId;
   };
@@ -834,7 +751,6 @@ const Home: React.FC = () => {
                 href="https://github.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                 aria-label="GitHub"
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-white/10 flex items-center justify-center hover:border-[#00B4FF] hover:bg-[#00B4FF]/10 transition-all group"
               >
                 <Github className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:text-[#00B4FF] transition-colors" />
@@ -843,7 +759,6 @@ const Home: React.FC = () => {
                 href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="X"
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-white/10 flex items-center justify-center hover:border-[#00B4FF] hover:bg-[#00B4FF]/10 transition-all group"
               >
                 <XIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:text-[#00B4FF] transition-colors" />
@@ -852,15 +767,13 @@ const Home: React.FC = () => {
           </div>
 
           <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs sm:text-sm text-gray-400">
-            <div className="text-center md:text-left">
-              <p>© 2026 Linkium. All rights reserved to Mohammad Ramiz.</p>
-              <p className="mt-1">
+            <p className="leading-relaxed">
+               © 2026 Linkium. All rights reserved to Mohammad Ramiz.
+                  <br />
                 <strong>Architecture & Core Developer:</strong> Mohammad Ramiz
-              </p>
-              <p>
+                 <br />
                 <strong>UI/UX Designer:</strong> Abhishek Mondal
-              </p>
-            </div>
+            </p>
 
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
               <Link to="/support" className="hover:text-[#00B4FF] transition-colors">Contact</Link>
