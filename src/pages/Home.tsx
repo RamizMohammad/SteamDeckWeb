@@ -747,12 +747,12 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs sm:text-sm text-gray-400">
-            <p>
-              &copy; 2026 Linkium. All rights reserved to Mohammad Ramiz.<br>
-              <strong>Architecture &amp; Core Developer:</strong> Mohammad Ramiz<br>
-              <strong>UI/UX Designer:</strong> Abhishek Mondal
-            </p>
+            <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs sm:text-sm text-gray-400">
+              <p className="leading-relaxed">
+                © 2026 Linkium. All rights reserved to Mohammad Ramiz.<br />
+                <strong>Architecture & Core Developer:</strong> Mohammad Ramiz<br />
+                <strong>UI/UX Designer:</strong> Abhishek Mondal
+              </p>
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
               <Link to="/support" className="hover:text-[#00B4FF] transition-colors">Contact</Link>
               <Link to="/privacy" className="hover:text-[#00B4FF] transition-colors">Privacy</Link>
