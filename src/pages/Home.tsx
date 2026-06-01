@@ -737,7 +737,7 @@ const Home: React.FC = () => {
                 <Github className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:text-[#00B4FF] transition-colors" />
               </a>
               <a
-                href="https://twitter.com"
+                href="https://X.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-white/10 flex items-center justify-center hover:border-[#00B4FF] hover:bg-[#00B4FF]/10 transition-all group"
@@ -748,7 +748,7 @@ const Home: React.FC = () => {
           </div>
 
           <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs sm:text-sm text-gray-400">
-            <p>© Linkium 2025. All rights reserved to Mohammad Ramiz.</p>
+            <p>© Linkium 2026. All rights reserved to Mohammad Ramiz.</p>
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
               <Link to="/support" className="hover:text-[#00B4FF] transition-colors">Contact</Link>
               <Link to="/privacy" className="hover:text-[#00B4FF] transition-colors">Privacy</Link>
