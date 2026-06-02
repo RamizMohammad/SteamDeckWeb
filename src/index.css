@@ -829,9 +829,10 @@ p {
   }
   
   /* Adjust glass effects on mobile */
-  .glass, .glass-strong, .glass-dark {
-    backdrop-filter: blur(8px);
-  }
+.glass, .glass-strong, .glass-dark {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
   
   /* Social icon buttons mobile */
   .social-icon-btn {
