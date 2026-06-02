@@ -28,9 +28,6 @@ export default defineConfig(({ mode }) => ({
       mangle: {
         toplevel: true,
         safari10: true,
-        properties: {
-          regex: /^_/,
-        },
       },
       format: {
         comments: false,
