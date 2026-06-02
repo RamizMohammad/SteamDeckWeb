@@ -46,19 +46,6 @@ interface Testimonial {
   role: string;
 }
 
-interface StepDetail {
-  text: string;
-  icon: string;
-}
-
-interface Step {
-  id: number;
-  title: string;
-  desc: string;
-  icon: React.FC<React.SVGProps<SVGSVGElement>>;
-  details: StepDetail[];
-}
-
 // Custom X (Twitter) Icon Component
 const XIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg
@@ -73,7 +60,7 @@ const XIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 // Custom hook to detect when an element is in viewport
 const useInView = (options?: IntersectionObserverInit) => {
-  const [isInView, setIsInView] = useState<boolean>(false);
+  const [isInView, setIsInView] = useState(false);
   const ref = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -97,74 +84,10 @@ const useInView = (options?: IntersectionObserverInit) => {
 const Home: React.FC = () => {
   const [scrollY, setScrollY] = useState<number>(0);
   const { ref: flowchartRef, isInView: isFlowchartInView } = useInView({ threshold: 0.15 });
-  const [activeStep, setActiveStep] = useState<number>(0);
-  const [showTickAll, setShowTickAll] = useState<boolean>(false);
-  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isAnimatingRef = useRef<boolean>(false);
-
-  // Security: Disable right-click and view source
-  useEffect(() => {
-    // Disable right-click
-    const disableRightClick = (e: MouseEvent): void => {
-      e.preventDefault();
-      return;
-    };
-
-    // Disable keyboard shortcuts
-    const disableKeyboardShortcuts = (e: KeyboardEvent): void => {
-      // Disable Ctrl+U (View Source)
-      if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
-        e.preventDefault();
-        return;
-      }
-      
-      // Disable Ctrl+Shift+I (Developer Tools)
-      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
-        e.preventDefault();
-        return;
-      }
-      
-      // Disable F12 (Developer Tools)
-      if (e.key === 'F12') {
-        e.preventDefault();
-        return;
-      }
-      
-      // Disable Ctrl+Shift+C (Inspect Element)
-      if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
-        e.preventDefault();
-        return;
-      }
-      
-      // Disable Ctrl+Shift+J (Console)
-      if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j')) {
-        e.preventDefault();
-        return;
-      }
-      
-      // Disable Ctrl+S (Save Page)
-      if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
-        e.preventDefault();
-        return;
-      }
-      
-      // Disable Ctrl+P (Print)
-      if (e.ctrlKey && (e.key === 'p' || e.key === 'P')) {
-        e.preventDefault();
-        return;
-      }
-    };
-
-    // Add event listeners
-    document.addEventListener('contextmenu', disableRightClick);
-    document.addEventListener('keydown', disableKeyboardShortcuts);
-
-    // Cleanup
-    return () => {
-      document.removeEventListener('contextmenu', disableRightClick);
-      document.removeEventListener('keydown', disableKeyboardShortcuts);
-    };
-  }, []);
+  const [activeStep, setActiveStep] = useState(0);
+  const [showTickAll, setShowTickAll] = useState(false);
+  const animationTimeoutRef = useRef<NodeJS.Timeout[]>([]);
+  const isAnimatingRef = useRef(false);
 
   useEffect(() => {
     const handleScroll = (): void => setScrollY(window.scrollY);
@@ -173,12 +96,180 @@ const Home: React.FC = () => {
   }, []);
 
   // Cleanup function for timeouts
-  const clearAllTimeouts = (): void => {
-    if (animationTimeoutRef.current) {
-      clearTimeout(animationTimeoutRef.current);
-      animationTimeoutRef.current = null;
-    }
+  const clearAllTimeouts = () => {
+    animationTimeoutRef.current.forEach(timeout => clearTimeout(timeout));
+    animationTimeoutRef.current = [];
   };
+
+  // Comprehensive anti-inspect protection
+  useEffect(() => {
+    // Only apply in production
+    if (process.env.NODE_ENV === 'production') {
+      
+      // 1. Disable right-click
+      const handleContextMenu = (e: MouseEvent) => {
+        e.preventDefault();
+        return false;
+      };
+
+      // 2. Disable all keyboard shortcuts for dev tools
+      const handleKeyDown = (e: KeyboardEvent) => {
+        // Prevent F12
+        if (e.key === 'F12') {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
+        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+U (view source)
+        if (e.ctrlKey && e.key === 'u') {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+Shift+U
+        if (e.ctrlKey && e.shiftKey && e.key === 'U') {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+Shift+K (Firefox)
+        if (e.ctrlKey && e.shiftKey && e.key === 'K') {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+Shift+S
+        if (e.ctrlKey && e.shiftKey && e.key === 'S') {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+Shift+E
+        if (e.ctrlKey && e.shiftKey && e.key === 'E') {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+Shift+P (Command Palette)
+        if (e.ctrlKey && e.shiftKey && e.key === 'P') {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+Shift+D (Bookmark all tabs)
+        if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+S (Save page)
+        if (e.ctrlKey && e.key === 's') {
+          e.preventDefault();
+          return false;
+        }
+        // Prevent Ctrl+P (Print)
+        if (e.ctrlKey && e.key === 'p') {
+          e.preventDefault();
+          return false;
+        }
+      };
+
+      // 3. Disable debugger statements and detect dev tools
+      let devToolsOpen = false;
+      const detectDevTools = () => {
+        const start = performance.now();
+        debugger;
+        const end = performance.now();
+        if (end - start > 100 || devToolsOpen) {
+          devToolsOpen = true;
+          // Clear the page content when dev tools is detected
+          document.body.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:black;color:white;display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;"><h1>⚠️ Developer Tools Detected!</h1><p>Please close Developer Tools to continue.</p><button onclick="location.reload()" style="margin-top:20px;padding:10px20px;background:#00B4FF;border:none;border-radius:5px;cursor:pointer;">Refresh Page</button></div>';
+          setTimeout(() => {
+            window.location.reload();
+          }, 5000);
+        }
+      };
+
+      // 4. Override console methods (makes console less useful)
+      if (typeof window !== 'undefined') {
+        const noop = () => {};
+        const consoleMethods = ['log', 'info', 'warn', 'error', 'debug', 'trace', 'table', 'group', 'groupCollapsed', 'groupEnd', 'dir', 'dirxml', 'profile', 'profileEnd', 'time', 'timeEnd', 'timeStamp', 'assert'];
+        consoleMethods.forEach(method => {
+          if (console[method]) {
+            try {
+              console[method] = noop;
+            } catch(e) {}
+          }
+        });
+      }
+
+      // 5. Prevent selection and copying
+      const handleSelect = (e: Event) => {
+        e.preventDefault();
+        return false;
+      };
+
+      // 6. Monitor for dev tools opening via window resize
+      let widthThreshold = window.outerWidth - window.innerWidth > 160;
+      let heightThreshold = window.outerHeight - window.innerHeight > 160;
+      const handleResize = () => {
+        if (!widthThreshold && !heightThreshold) {
+          widthThreshold = window.outerWidth - window.innerWidth > 160;
+          heightThreshold = window.outerHeight - window.innerHeight > 160;
+          if (widthThreshold || heightThreshold) {
+            document.body.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:black;color:white;display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;"><h1>⚠️ Developer Tools Detected!</h1><p>Please close Developer Tools to continue.</p><button onclick="location.reload()" style="margin-top:20px;padding:10px 20px;background:#00B4FF;border:none;border-radius:5px;cursor:pointer;">Refresh Page</button></div>';
+            setTimeout(() => {
+              window.location.reload();
+            }, 5000);
+          }
+        }
+      };
+
+      // 7. Disable source map loading
+      const originalError = window.onerror;
+      window.onerror = (message, source, lineno, colno, error) => {
+        if (source && (source.includes('.map') || source.includes('chrome-extension'))) {
+          return true;
+        }
+        if (originalError) {
+          return originalError(message, source, lineno, colno, error);
+        }
+        return false;
+      };
+
+      // 8. Prevent dragging of images and content
+      const handleDragStart = (e: DragEvent) => {
+        e.preventDefault();
+        return false;
+      };
+
+      // 9. Disable copy/paste
+      const handleCopy = (e: ClipboardEvent) => {
+        e.preventDefault();
+        return false;
+      };
+
+      // Add event listeners
+      document.addEventListener('contextmenu', handleContextMenu);
+      document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('selectstart', handleSelect);
+      document.addEventListener('dragstart', handleDragStart);
+      document.addEventListener('copy', handleCopy);
+      window.addEventListener('resize', handleResize);
+      
+      // Start dev tools detection interval
+      const detectionInterval = setInterval(detectDevTools, 2000);
+      
+      // Cleanup
+      return () => {
+        document.removeEventListener('contextmenu', handleContextMenu);
+        document.removeEventListener('keydown', handleKeyDown);
+        document.removeEventListener('selectstart', handleSelect);
+        document.removeEventListener('dragstart', handleDragStart);
+        document.removeEventListener('copy', handleCopy);
+        window.removeEventListener('resize', handleResize);
+        clearInterval(detectionInterval);
+        window.onerror = originalError;
+      };
+    }
+  }, []);
 
   // Unified flowchart animation effect with proper cleanup
   useEffect(() => {
@@ -189,7 +280,7 @@ const Home: React.FC = () => {
       isAnimatingRef.current = true;
       
       // Start animation sequence
-      const animateSteps = (): void => {
+      const animateSteps = () => {
         setActiveStep(1);
         setShowTickAll(false);
         
@@ -211,20 +302,7 @@ const Home: React.FC = () => {
         }, 8000);
         
         // Store all timeouts for cleanup
-        animationTimeoutRef.current = step2Timer as unknown as NodeJS.Timeout;
-        
-        // Cleanup function for this animation cycle
-        const cleanup = (): void => {
-          clearTimeout(step2Timer);
-          clearTimeout(step3Timer);
-          clearTimeout(completionTimer);
-          clearTimeout(repeatTimer);
-        };
-        
-        // Store cleanup reference
-        if (animationTimeoutRef.current) {
-          (animationTimeoutRef.current as any).cleanup = cleanup;
-        }
+        animationTimeoutRef.current.push(step2Timer, step3Timer, completionTimer, repeatTimer);
       };
       
       animateSteps();
@@ -363,7 +441,7 @@ const Home: React.FC = () => {
     },
   ];
 
-  const steps: Step[] = [
+  const steps = [
     {
       id: 1,
       title: "Install Linkium",
@@ -397,7 +475,7 @@ const Home: React.FC = () => {
   ];
 
   // Helper function to determine if a step should show tick mark
-  const shouldShowTick = (stepId: number): boolean => {
+  const shouldShowTick = (stepId: number) => {
     if (showTickAll) return true;
     return activeStep > stepId;
   };
@@ -834,7 +912,6 @@ const Home: React.FC = () => {
                 href="https://github.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                 aria-label="GitHub"
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-white/10 flex items-center justify-center hover:border-[#00B4FF] hover:bg-[#00B4FF]/10 transition-all group"
               >
                 <Github className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:text-[#00B4FF] transition-colors" />
@@ -843,7 +920,6 @@ const Home: React.FC = () => {
                 href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="X"
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-white/10 flex items-center justify-center hover:border-[#00B4FF] hover:bg-[#00B4FF]/10 transition-all group"
               >
                 <XIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:text-[#00B4FF] transition-colors" />
@@ -852,15 +928,13 @@ const Home: React.FC = () => {
           </div>
 
           <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs sm:text-sm text-gray-400">
-            <div className="text-center md:text-left">
-              <p>© 2026 Linkium. All rights reserved to Mohammad Ramiz.</p>
-              <p className="mt-1">
+            <p className="leading-relaxed">
+               © 2026 Linkium. All rights reserved to Mohammad Ramiz.
+                  <br />
                 <strong>Architecture & Core Developer:</strong> Mohammad Ramiz
-              </p>
-              <p>
+                 <br />
                 <strong>UI/UX Designer:</strong> Abhishek Mondal
-              </p>
-            </div>
+            </p>
 
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
               <Link to="/support" className="hover:text-[#00B4FF] transition-colors">Contact</Link>
