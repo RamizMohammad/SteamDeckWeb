@@ -1,5 +1,3 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import {
   Brain,
   ChevronRight,
@@ -20,6 +18,8 @@ import {
   Smartphone,
   Zap,
 } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import NetworkBackground from './NetworkBackground';
 
 // Type definitions
@@ -152,7 +152,7 @@ const Home: React.FC = () => {
   }, []);
 
   const handleConnect = useCallback((): void => {
-    window.open('https://connection.linkium.space/', '_blank');
+    window.open('https://connection.desksync.space/', '_blank');
   }, []);
 
   const features: Feature[] = [
